@@ -1,39 +1,516 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Insurance Prediction</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Insurance Premium Predictor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 780px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .header .badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    .header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 700;
+      color: #f1f5f9;
+      line-height: 1.2;
+    }
+    .header h1 span { color: #38bdf8; }
+    .header p {
+      margin-top: 0.6rem;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    /* Card */
+    .card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1.5rem;
+      padding: 2.5rem 2rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #38bdf8;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.2rem;
+    }
+    @media (max-width: 560px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .card { padding: 1.5rem 1rem; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.45rem; }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.04em;
+    }
+
+    input, select {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 0.65rem;
+      padding: 0.65rem 0.9rem;
+      color: #f1f5f9;
+      font-size: 0.92rem;
+      width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.07);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+    select option { background: #1e3a5f; color: #f1f5f9; }
+
+    /* Custom select arrow */
+    .select-wrap { position: relative; }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      pointer-events: none;
+      font-size: 0.85rem;
+    }
+
+    /* Smoker toggle */
+    .toggle-group {
+      display: flex;
+      gap: 0.6rem;
+    }
+    .toggle-group input[type="radio"] { display: none; }
+    .toggle-group label {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem 0;
+      border-radius: 0.65rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: #64748b;
+      transition: all 0.2s;
+    }
+    .toggle-group input[type="radio"]:checked + label {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+    }
+
+    .divider { margin: 1.8rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.07); }
+
+    /* Submit button */
+    .btn {
+      width: 100%;
+      padding: 0.9rem;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: linear-gradient(135deg, #0ea5e9, #2563eb);
+      color: #fff;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35);
+      margin-top: 0.5rem;
+    }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(14,165,233,0.45); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    /* Result */
+    #result {
+      margin-top: 1.5rem;
+      border-radius: 1rem;
+      padding: 1.2rem 1.4rem;
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+    #result.success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    #result.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    #result .result-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    #result.success .result-label { color: #10b981; }
+    #result.error .result-label { color: #ef4444; }
+    #result .result-category {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    #result .result-confidence {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+    #result .result-error-msg { font-size: 0.9rem; color: #fca5a5; }
+
+    /* Confidence bar */
+    .confidence-bar-wrap {
+      margin-top: 0.75rem;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .confidence-bar {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #10b981, #34d399);
+      transition: width 0.8s ease;
+    }
+
+    /* Loader */
+    .loader {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+    /* Developer Footer */
+    .dev-footer {
+      margin-top: 2.5rem;
+      text-align: center;
+    }
+    .dev-footer .dev-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 1rem;
+    }
+    .dev-card {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.9rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 1.2rem;
+      padding: 1.4rem 2rem;
+      backdrop-filter: blur(8px);
+    }
+    .dev-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      letter-spacing: 0.02em;
+    }
+    .dev-name span {
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .dev-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+    }
+    .dev-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.95rem;
+      border-radius: 0.6rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
+      border: 1px solid transparent;
+    }
+    .dev-link:hover { transform: translateY(-2px); opacity: 0.9; }
+    .dev-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    .dev-link.linkedin {
+      background: rgba(0, 119, 181, 0.18);
+      border-color: rgba(0, 119, 181, 0.4);
+      color: #60b8e8;
+      box-shadow: 0 2px 10px rgba(0,119,181,0.15);
+    }
+    .dev-link.instagram {
+      background: rgba(228, 64, 95, 0.15);
+      border-color: rgba(228, 64, 95, 0.35);
+      color: #f472a0;
+      box-shadow: 0 2px 10px rgba(228,64,95,0.12);
+    }
+    .dev-link.tryhackme {
+      background: rgba(33, 44, 66, 0.6);
+      border-color: rgba(100, 120, 180, 0.35);
+      color: #a5b4fc;
+      box-shadow: 0 2px 10px rgba(100,120,180,0.12);
+    }
+    .dev-link.portfolio {
+      background: rgba(0, 255, 136, 0.1);
+      border-color: rgba(0, 255, 136, 0.3);
+      color: #34d399;
+      box-shadow: 0 2px 10px rgba(0,255,136,0.1);
+    }
+  </style>
 </head>
 <body>
+<div class="container">
+  <div class="header">
+    <div class="badge">AI-Powered</div>
+    <h1>Insurance <span>Premium</span> Predictor</h1>
+    <p>Fill in your details to get an instant insurance category prediction</p>
+  </div>
 
-<h1>Insurance Category Prediction</h1>
+  <div class="card">
+    <!-- Personal Info -->
+    <div class="section-title">Personal Information</div>
+    <div class="grid-3">
+      <div class="field">
+        <label for="age">Age</label>
+        <input type="number" id="age" min="1" max="120" value="30" />
+      </div>
+      <div class="field">
+        <label for="weight">Weight (kg)</label>
+        <input type="number" id="weight" min="1" step="0.1" value="65.0" />
+      </div>
+      <div class="field">
+        <label for="height">Height (m)</label>
+        <input type="number" id="height" min="0.5" max="2.5" step="0.01" value="1.70" />
+      </div>
+    </div>
 
-<form method="POST">
+    <hr class="divider" />
 
-    <input type="number" name="age" placeholder="Age" required><br><br>
+    <!-- Financial & Location -->
+    <div class="section-title">Financial & Location</div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="income_lpa">Income (LPA)</label>
+        <input type="number" id="income_lpa" min="0.1" step="0.1" value="10.0" />
+      </div>
+      <div class="field">
+        <label for="city">City</label>
+        <input type="text" id="city" value="Mumbai" placeholder="e.g. Delhi" />
+      </div>
+    </div>
 
-    <input type="number" step="0.1" name="weight" placeholder="Weight"><br><br>
+    <hr class="divider" />
 
-    <input type="number" step="0.1" name="height" placeholder="Height"><br><br>
+    <!-- Lifestyle & Occupation -->
+    <div class="section-title">Lifestyle & Occupation</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Smoker?</label>
+        <div class="toggle-group">
+          <input type="radio" name="smoker" id="smoker-no" value="false" checked />
+          <label for="smoker-no">No</label>
+          <input type="radio" name="smoker" id="smoker-yes" value="true" />
+          <label for="smoker-yes">Yes</label>
+        </div>
+      </div>
+      <div class="field">
+        <label for="occupation">Occupation</label>
+        <div class="select-wrap">
+          <select id="occupation">
+            {% for occ in occupations %}
+            <option value="{{ occ }}" {% if occ == 'Software Engineer' %}selected{% endif %}>{{ occ }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
 
-    <input type="number" step="0.1" name="income_lpa" placeholder="Income"><br><br>
+    <hr class="divider" />
 
-    <select name="smoker">
-        <option value="True">Smoker</option>
-        <option value="False">Non Smoker</option>
-    </select><br><br>
+    <button class="btn" id="predictBtn" onclick="predict()">
+      Predict Premium Category
+    </button>
 
-    <input type="text" name="city" placeholder="City"><br><br>
+    <!-- Result -->
+    <div id="result">
+      <div class="result-label" id="resultLabel"></div>
+      <div id="resultContent"></div>
+    </div>
+  </div>
+</div>
 
-    <input type="text" name="occupation" placeholder="Occupation"><br><br>
+  <!-- Developer Footer -->
+  <div class="dev-footer">
+    <div class="dev-label">Built by</div>
+    <div class="dev-card">
+      <div class="dev-name">⚡ <span>Fairoz Ahmad Sheikh</span></div>
+      <div class="dev-links">
 
-    <button type="submit">Predict</button>
+        <a href="https://www.github.com/FairozAhmadSheikh/" target="_blank" rel="noopener" class="dev-link linkedin">
+         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+         Github
+        </a>
 
-</form>
+        <a href="https://instagram.com/ahmmadferoz/" target="_blank" rel="noopener" class="dev-link instagram">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          @ahmmadferoz
+        </a>
 
-{% if result %}
-<h2>Prediction Result</h2>
-<p>{{ result }}</p>
-{% endif %}
+        <a href="https://tryhackme.com/p/fairozahmadsheik" target="_blank" rel="noopener" class="dev-link tryhackme">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.705 0C7.54 0 4.902 2.246 4.334 5.242a3.92 3.92 0 00-.519-.034C1.709 5.208 0 6.915 0 9.022s1.71 3.814 3.815 3.814h6.89V0zm2.59 24c3.164 0 5.802-2.246 6.37-5.242.174.022.347.034.52.034 2.105 0 3.815-1.707 3.815-3.814s-1.71-3.814-3.815-3.814h-6.89V24z"/></svg>
+          TryHackMe · Top 0.1% 🏴‍☠️
+        </a>
 
+        <a href="https://portfolio-three-gray-24.vercel.app/" target="_blank" rel="noopener" class="dev-link portfolio">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c.668 0 1.322.07 1.957.2L12 4.698 10.043 2.2A10.024 10.024 0 0112 2zM7.518 2.89L10 6H6.234A10.02 10.02 0 017.518 2.89zM2.2 10H6l-2 4H2.08A9.967 9.967 0 012.2 10zm.08 6H4l2 4H4.43A9.987 9.987 0 012.28 16zm5.664 5.9L6 18h3.758l-1.814 3.9zM12 22l-2-4h4l-2 4zm2.056-.1L12.242 18H16l-1.944 3.9zM19.57 20H18l-2-4h1.72a9.987 9.987 0 01-2.15 4zM18 14l2 4h1.72A9.967 9.967 0 0022 14h-4zm-6-8l2-4a9.973 9.973 0 011.957 1.2L16 6h-4zm-2 0H6l2-4 2 4zm4.758 0H16l-1.518-3.11A10.02 10.02 0 0116.482 6H14.758z"/></svg>
+          Portfolio
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  async function predict() {
+    const btn = document.getElementById('predictBtn');
+    const result = document.getElementById('result');
+
+    // Basic validation
+    const age = document.getElementById('age').value;
+    const weight = document.getElementById('weight').value;
+    const height = document.getElementById('height').value;
+    const income_lpa = document.getElementById('income_lpa').value;
+    const city = document.getElementById('city').value.trim();
+    const occupation = document.getElementById('occupation').value;
+    const smoker = document.querySelector('input[name="smoker"]:checked').value;
+
+    if (!city) {
+      showError('Please enter your city.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span>Predicting...';
+    result.style.display = 'none';
+
+    try {
+      const response = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ age, weight, height, income_lpa, city, occupation, smoker })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showSuccess(data.category, data.confidence);
+      } else {
+        showError(data.error);
+      }
+    } catch (err) {
+      showError('Network error: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Predict Premium Category';
+    }
+  }
+
+  function showSuccess(category, confidence) {
+    const result = document.getElementById('result');
+    document.getElementById('resultLabel').textContent = '✓ Prediction Result';
+    document.getElementById('resultContent').innerHTML = `
+      <div class="result-category">${category}</div>
+      <div class="result-confidence">Confidence: <strong>${confidence}%</strong></div>
+      <div class="confidence-bar-wrap">
+        <div class="confidence-bar" id="confBar" style="width:0%"></div>
+      </div>
+    `;
+    result.className = 'success';
+    result.style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('confBar').style.width = confidence + '%';
+    }, 50);
+  }
+
+  function showError(msg) {
+    const result = document.getElementById('result');
+    document.getElementById('resultLabel').textContent = '✗ Error';
+    document.getElementById('resultContent').innerHTML = `<div class="result-error-msg">${msg}</div>`;
+    result.className = 'error';
+    result.style.display = 'block';
+  }
+</script>
 </body>
 </html>
