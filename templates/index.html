@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Insurance Prediction</title>
+</head>
+<body>
+
+<h1>Insurance Category Prediction</h1>
+
+<form method="POST">
+
+    <input type="number" name="age" placeholder="Age" required><br><br>
+
+    <input type="number" step="0.1" name="weight" placeholder="Weight"><br><br>
+
+    <input type="number" step="0.1" name="height" placeholder="Height"><br><br>
+
+    <input type="number" step="0.1" name="income_lpa" placeholder="Income"><br><br>
+
+    <select name="smoker">
+        <option value="True">Smoker</option>
+        <option value="False">Non Smoker</option>
+    </select><br><br>
+
+    <input type="text" name="city" placeholder="City"><br><br>
+
+    <input type="text" name="occupation" placeholder="Occupation"><br><br>
+
+    <button type="submit">Predict</button>
+
+</form>
+
+{% if result %}
+<h2>Prediction Result</h2>
+<p>{{ result }}</p>
+{% endif %}
+
+</body>
+</html>
