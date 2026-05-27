@@ -15,7 +15,7 @@ Provide this app with some basic details and it will predict insurance premium c
 # Incase of running locally use 
 bash
 ```
-pip install requirements.txt
+pip install streamlit requests
 
 streamlit run frontend.py
 
